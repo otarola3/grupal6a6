@@ -4,9 +4,11 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from .models import Contenido, DatosCliente, DatosProveedor, ContenidoProveedor
-from primera_aplicacion.forms.formulario import FormularioUsuarioForm, FormularioSupplierForm, LoginForm
+from primera_aplicacion.forms.formulario import FormularioUsuarioForm, FormularioSupplierForm, LoginForm, RegistrationForm
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.hashers import make_password
+
 
 # Create your views here.
 
@@ -97,6 +99,9 @@ class FormSuppliers(PermissionRequiredMixin, LoginRequiredMixin, TemplateView):
 class RestringidaView(TemplateView):    
     template_name = 'restringida.html'
 
+class BienvenidaView(TemplateView):    
+    template_name = 'bienvenida.html'
+
 
 def contenido(request):
     datos = Contenido.objects.all()
@@ -113,6 +118,29 @@ def contenido_proveedores(request):
 
     return render(request, 'contenido_proveedores.html', contexto)
 
+def register(request):
+    if request.method == 'POST':
+        print('cualquier cosa')
+        form = RegistrationForm(request.POST)
+        print(form.errors   , 'se imprimio el 4 request')
+        if form.is_valid():
+            username = form.cleaned_data["username"]
+            first_name = form.cleaned_data["first_name"]
+            last_name = form.cleaned_data["last_name"]
+            password = form.cleaned_data['password1']
+            
+            email = form.cleaned_data["email"]
+            usuario_nuevo = User(username= username, first_name =  first_name, last_name = last_name , email = email)
+            usuario_nuevo.password = make_password(password)
+            print(usuario_nuevo, ' se imprimio el usuario')
+            usuario_nuevo.save()
+            user = authenticate(request, username=username, password=password)
+            login(request, user)
+            print(f'############ USUARIO  => ',user)
+            return redirect('/bienvenida')  # Cambia 'home' por la URL de tu página de inicio
+    else:
+        form = RegistrationForm()
+    return render(request, 'registro.html', {'form': form})
 
 def user_login(request):
     if request.method == 'POST':
@@ -123,6 +151,7 @@ def user_login(request):
             password = form.cleaned_data['password']
             print(username, password)
             user = authenticate(request, username=username, password=password)
+            
             if user is not None:
                 if user.is_active:
                     print("Usuario activo")

@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from primera_aplicacion.views import index_welcome, UsersApp, contenido, contenido_proveedores,FormUsers, FormSuppliers, user_login, RestringidaView
+from primera_aplicacion.views import index_welcome, UsersApp, contenido, contenido_proveedores,FormUsers, FormSuppliers, user_login, RestringidaView, register, BienvenidaView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views 
 urlpatterns = [
@@ -29,5 +29,7 @@ urlpatterns = [
     path('formulario_proveedores/<int:id>', login_required(FormSuppliers.as_view()), name='form_suppliers'),
     path('login/', views.LoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
-    path('restringida/', login_required(RestringidaView.as_view()), name='restringida')
+    path('restringida/', login_required(RestringidaView.as_view()), name='restringida'),
+    path('registro/', register, name='register'),
+    path('bienvenida/', BienvenidaView.as_view(), name='bienvenida')
 ]
